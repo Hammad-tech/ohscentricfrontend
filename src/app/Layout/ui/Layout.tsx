@@ -1,6 +1,5 @@
 import { FC } from "react";
 import { Outlet } from "react-router-dom";
-import { Analytics } from '@vercel/analytics/next';
 
 const Layout: FC = () => {
   return (
@@ -8,7 +7,6 @@ const Layout: FC = () => {
       <main>
         <Outlet />
       </main>
-      <Analytics />
     </div>
   );
 };
