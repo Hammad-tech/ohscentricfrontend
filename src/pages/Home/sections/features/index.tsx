@@ -20,12 +20,6 @@ const Features = () => {
       description: "Get the information you need anytime, without waiting for business hours.",
       gradient: "from-purple-50 to-purple-100"
     },
-    {
-      icon: <Users size={28} className="text-orange-600" />,
-      title: "Team Training",
-      description: "Use our chatbot to help train your team on important safety procedures.",
-      gradient: "from-orange-50 to-orange-100"
-    }
   ];
 
   return (
@@ -33,7 +27,7 @@ const Features = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <span className="inline-block px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 rounded-full mb-4">
-            Why SafetyBot?
+            Why Ohsist?
           </span>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Transform Your Workplace Safety
@@ -43,7 +37,7 @@ const Features = () => {
             and create a safer working environment with cutting-edge technology.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <div 
               key={index} 
@@ -76,7 +70,7 @@ const Features = () => {
             href="#chatbot" 
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
           >
-            Try SafetyBot Now
+            Ohsist
             <svg className="w-5 h-5 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>

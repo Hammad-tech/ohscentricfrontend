@@ -4,7 +4,7 @@ import { Send, Paperclip, Bot, User } from "lucide-react";
 const ChatBot = () => {
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([
-    { sender: "bot", message: "Hello! I'm SafetyBot. Ask me any workplace safety questions." }
+    { sender: "bot", message: "Hello! I'm Ohsist. Ask me any workplace safety questions." }
   ]);
   const [promptsRemaining, setPromptsRemaining] = useState(3);
   const [showPaywall, setShowPaywall] = useState(false);
@@ -38,7 +38,7 @@ const ChatBot = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-gray-800">Try Our Safety Chatbot</h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Get instant answers to your workplace safety questions. Try it now with 2 free prompts.
+            Get instant answers to your workplace safety questions. Try it now with 3 free prompts.
           </p>
         </div>
         <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
@@ -48,7 +48,7 @@ const ChatBot = () => {
                 <Bot size={20} />
               </div>
               <div>
-                <h3 className="font-semibold">SafetyBot</h3>
+                <h3 className="font-semibold">Ohsist</h3>
                 <div className="text-xs opacity-90">
                   {promptsRemaining > 0 ? 
                     `${promptsRemaining} free ${promptsRemaining === 1 ? 'prompt' : 'prompts'} remaining` : 
@@ -102,7 +102,7 @@ const ChatBot = () => {
                   You've used all your free prompts
                 </h4>
                 <p className="mb-4 text-gray-600">
-                  Subscribe to our service to continue using SafetyBot and get unlimited access to workplace safety expertise.
+                  Subscribe to our service to continue using Ohsist and get unlimited access to workplace safety expertise.
                 </p>
                 <div className="space-y-3">
                   <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md">
@@ -144,7 +144,7 @@ const ChatBot = () => {
                 </button>
               </div>
               <div className="text-xs text-gray-500 mt-2 text-center">
-                SafetyBot may produce inaccurate information about workplace safety regulations.
+                Ohsist may produce inaccurate information about workplace safety regulations.
               </div>
             </form>
           )}

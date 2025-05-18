@@ -1,4 +1,4 @@
-import { Check, Zap, Star } from "lucide-react";
+import { Check, Zap, Star, Mail } from "lucide-react";
 
 const Pricing = () => {
   const plans = [
@@ -10,7 +10,7 @@ const Pricing = () => {
       features: [
         "3 free prompts per day",
         "Basic safety questions",
-        "Limited file uploads",
+        "Limited file downloads",
         "Standard response time",
         "Community support"
       ],
@@ -20,14 +20,13 @@ const Pricing = () => {
     },
     {
       name: "Professional",
-      price: "$29",
+      price: "$19",
       period: "per month",
       description: "Perfect for small teams and businesses",
       features: [
         "Unlimited prompts",
         "Advanced safety guidance",
-        "Priority support",
-        "File upload capability",
+        "File download capability",
         "Compliance recommendations",
         "Email support"
       ],
@@ -37,16 +36,13 @@ const Pricing = () => {
     },
     {
       name: "Enterprise",
-      price: "$249",
-      period: "per year",
+      price: "",
+      period: "ohscentric@gmail.com",
       description: "Best value for long-term use",
       features: [
         "Everything in Professional",
-        "Save 28% compared to monthly",
         "Company-wide access",
         "Custom safety protocols",
-        "Regular compliance updates",
-        "Dedicated account manager"
       ],
       button: "Subscribe Now",
       popular: false,
@@ -92,7 +88,13 @@ const Pricing = () => {
                 </div>
                 <div className="mb-6">
                   <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                  <span className="text-gray-600">/{plan.period}</span>
+                  <span className="text-gray-600 inline-flex gap-3 items-center">
+                    {plan.name === "Enterprise" && (
+                      <Mail size={24} />
+                    )}
+                    <span className={plan.name === "Enterprise" ? 'hidden' : 'block'} >/</span>
+                    {plan.period}
+                  </span>
                 </div>
                 <p className="text-gray-600 mb-6">{plan.description}</p>
                 <ul className="mb-8 space-y-3 flex-grow">
