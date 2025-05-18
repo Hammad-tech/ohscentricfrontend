@@ -18,7 +18,7 @@ const Hero = () => {
             <div className="inline-block px-4 py-2 bg-blue-800 bg-opacity-40 rounded-full mb-6">
               <span className="text-blue-200 font-medium text-sm flex items-center">
                 <ShieldCheck size={16} className="mr-2" />
-                OSHA Compliant Solution
+                WHS Compliant Solution
               </span>
             </div>
             <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
@@ -39,25 +39,6 @@ const Hero = () => {
                   className={`ml-2 transition-transform duration-300 ${isHoveredPrimary ? "transform translate-x-1" : ""}`}
                 />
               </button>
-              <button 
-                className={`px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 flex items-center justify-center ${isHoveredSecondary ? "bg-blue-700 bg-opacity-30 transform -translate-y-1" : ""}`}
-                onMouseEnter={() => setIsHoveredSecondary(true)}
-                onMouseLeave={() => setIsHoveredSecondary(false)}
-              >
-                Learn More
-              </button>
-            </div>
-            <div className="mt-12 flex items-center space-x-6">
-              <div className="flex -space-x-4">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="w-10 h-10 rounded-full bg-blue-400 border-2 border-white flex items-center justify-center font-bold text-sm">
-                    {String.fromCharCode(65 + i)}
-                  </div>
-                ))}
-              </div>
-              <p className="text-blue-100 text-sm">
-                <span className="font-bold">500+</span> companies trust our solution
-              </p>
             </div>
           </div>
           <div className="lg:w-1/2 relative">
@@ -72,10 +53,6 @@ const Hero = () => {
               <div className="absolute -bottom-5 -left-5 bg-blue-800 px-4 py-3 rounded-lg shadow-lg flex items-center">
                 <MessageSquareText size={20} className="mr-2 text-blue-200" />
                 <span className="font-medium text-white">24/7 Support</span>
-              </div>
-              <div className="absolute -top-5 -right-5 bg-blue-800 px-4 py-3 rounded-lg shadow-lg flex items-center">
-                <Users size={20} className="mr-2 text-blue-200" />
-                <span className="font-medium text-white">Team Access</span>
               </div>
             </div>
           </div>

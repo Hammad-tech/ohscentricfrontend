@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, Notebook } from "lucide-react";
+import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, Notebook, AlertCircle, Radio, Video } from "lucide-react";
 
 interface SidebarLinkProps {
   icon: React.ReactNode;
@@ -23,6 +23,32 @@ const SidebarLink: FC<SidebarLinkProps> = ({ icon, text, active, onClick, isColl
       <span className="text-lg">{icon}</span>
       {!isCollapsed && <span className="font-medium truncate">{text}</span>}
     </button>
+  );
+};
+
+interface ComingSoonItemProps {
+  title: string;
+  isCollapsed?: boolean;
+  icon: React.ReactNode;
+}
+
+const ComingSoonItem: FC<ComingSoonItemProps> = ({ title, isCollapsed, icon }) => {
+  return (
+    <div className={`border border-gray-200 flex items-center ${isCollapsed ? 'justify-center' : ''} rounded-lg p-3 mb-3 hover:bg-gray-50 transition-colors group cursor-pointer`}>
+      <div className="flex items-center gap-3">
+        <div className="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 group-hover:bg-blue-200 transition-colors">
+          {icon}
+        </div>
+        {!isCollapsed ? (
+          <div>
+            <p className="text-gray-800 font-medium">{title}</p>
+            <p className="text-xs text-gray-500">Coming Soon...</p>
+          </div>
+        ) : (
+          <p className="sr-only">{title}</p>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -93,12 +119,24 @@ const Sidebar: FC<SidebarProps> = ({
             )}
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+        <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-1">
           <SidebarLink icon={<Home />} text="Dashboard" active isCollapsed={isCollapsed} />
           <SidebarLink icon={<MessageSquare />} text="Messages" isCollapsed={isCollapsed} />
           <SidebarLink icon={<Layers />} text="Projects" isCollapsed={isCollapsed} />
           <SidebarLink icon={<BookOpen />} text="Documentation" isCollapsed={isCollapsed} />
           <SidebarLink icon={<Users />} text="Community" isCollapsed={isCollapsed} />
+          <div className="mt-10 mb-2">
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4 mb-3">
+                COMING SOON
+              </h3>
+            )}
+            <div className={`${isCollapsed ? "px-1" : ""} space-y-1`}>
+              <ComingSoonItem title="OhsVid" icon={<Video size={16} />} isCollapsed={isCollapsed} />
+              <ComingSoonItem title="OhsAware" icon={<AlertCircle size={16} />} isCollapsed={isCollapsed} />
+              <ComingSoonItem title="OhsPodcast" icon={<Radio size={16} />} isCollapsed={isCollapsed} />
+            </div>
+          </div>
         </div>
         <div className="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1">
           <SidebarLink icon={<HelpCircle />} text="Help & Support" isCollapsed={isCollapsed} />
