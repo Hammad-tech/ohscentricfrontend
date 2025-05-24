@@ -1,5 +1,6 @@
 import { FC } from "react";
-import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, Notebook, AlertCircle, Radio, Video } from "lucide-react";
+import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, Notebook, AlertCircle, Radio, Video, Bot, Link, LogIn, UserPlus } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface SidebarLinkProps {
   icon: React.ReactNode;
@@ -65,6 +66,13 @@ const Sidebar: FC<SidebarProps> = ({
   isMobile = false,
   isOpen = true
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActiveRoute = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <div>
       {isMobile && isOpen && (
@@ -84,7 +92,7 @@ const Sidebar: FC<SidebarProps> = ({
               <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
                 <Notebook size={18} className="text-white" />
               </div>
-              <h1 className="text-xl font-semibold text-gray-800 dark:text-white truncate">SafetyBot</h1>
+              <h1 className="text-xl font-semibold text-gray-800 dark:text-white truncate">Ohist</h1>
             </div>
           )}
           {isCollapsed && !isMobile && (
@@ -120,11 +128,27 @@ const Sidebar: FC<SidebarProps> = ({
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-1">
-          <SidebarLink icon={<Home />} text="Dashboard" active isCollapsed={isCollapsed} />
-          <SidebarLink icon={<MessageSquare />} text="Messages" isCollapsed={isCollapsed} />
-          <SidebarLink icon={<Layers />} text="Projects" isCollapsed={isCollapsed} />
-          <SidebarLink icon={<BookOpen />} text="Documentation" isCollapsed={isCollapsed} />
-          <SidebarLink icon={<Users />} text="Community" isCollapsed={isCollapsed} />
+          <SidebarLink 
+            onClick={() => navigate('/')} 
+            icon={<Home />} 
+            text="Home" 
+            active={isActiveRoute('/')} 
+            isCollapsed={isCollapsed} 
+          />
+          <SidebarLink 
+            onClick={() => navigate('/chatbot')} 
+            icon={<Bot />} 
+            text="Chatbot" 
+            active={isActiveRoute('/chatbot')} 
+            isCollapsed={isCollapsed} 
+          />
+          <SidebarLink 
+            onClick={() => navigate('/links')} 
+            icon={<Link />} 
+            text="Links" 
+            active={isActiveRoute('/links')} 
+            isCollapsed={isCollapsed} 
+          />
           <div className="mt-10 mb-2">
             {!isCollapsed && (
               <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4 mb-3">
@@ -142,16 +166,21 @@ const Sidebar: FC<SidebarProps> = ({
           <SidebarLink icon={<HelpCircle />} text="Help & Support" isCollapsed={isCollapsed} />
           <SidebarLink icon={<Settings />} text="Settings" isCollapsed={isCollapsed} />
         </div>
-        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0"></div>
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-800 dark:text-white truncate">John Doe</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">john.doe@example.com</p>
-              </div>
-            )}
-          </div>
+        <div className="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1">
+          <SidebarLink 
+            onClick={() => navigate('/login')} 
+            icon={<LogIn />} 
+            text="Login" 
+            active={isActiveRoute('/login')} 
+            isCollapsed={isCollapsed} 
+          />
+          <SidebarLink 
+            onClick={() => navigate('/signup')} 
+            icon={<UserPlus />} 
+            text="Sign Up" 
+            active={isActiveRoute('/signup')} 
+            isCollapsed={isCollapsed} 
+          />
         </div>
       </div>
     </div>
