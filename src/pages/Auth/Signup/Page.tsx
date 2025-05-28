@@ -1,33 +1,54 @@
 import { useState } from "react";
 import { ArrowRight, Check, Zap, Shield, FileText, Headset, CreditCard, Star, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/app/context/AuthContext";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [selectedPlan, setSelectedPlan] = useState("professional");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  
+  const { signup, isLoading } = useAuth();
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
 
+    if (!name.trim()) {
+      setError("Please enter your full name");
+      return;
+    }
+    
+    if (!email.trim()) {
+      setError("Please enter your email address");
+      return;
+    }
+    
+    if (!password || password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
+    }
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await signup(name.trim(), email.trim(), password, selectedPlan);
       
       if (selectedPlan === "enterprise") {
         alert("Enterprise plan selected! We'll contact you shortly at " + email);
       } else {
         alert(`${selectedPlan === "starter" ? "Free account" : "Premium subscription"} created successfully!`);
       }
+      
+      navigate("/chatbot");
+      
     } catch (err) {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -192,7 +213,7 @@ const SignupPage = () => {
                     {error}
                   </div>
                 )}
-                <div className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Full Name
@@ -203,7 +224,8 @@ const SignupPage = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                      disabled={isLoading}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -217,7 +239,8 @@ const SignupPage = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                      disabled={isLoading}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="you@company.com"
                     />
                   </div>
@@ -232,7 +255,8 @@ const SignupPage = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       minLength={8}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                      disabled={isLoading}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Create a strong password"
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -262,7 +286,8 @@ const SignupPage = () => {
                       id="terms"
                       type="checkbox"
                       required
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 mt-1"
+                      disabled={isLoading}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 mt-1 disabled:opacity-50"
                     />
                     <label htmlFor="terms" className="ml-3 block text-sm text-gray-700 dark:text-gray-300">
                       I agree to the{" "}
@@ -276,15 +301,14 @@ const SignupPage = () => {
                     </label>
                   </div>
                   <button
-                    type="button"
-                    onClick={handleSubmit}
+                    type="submit"
                     disabled={isLoading}
                     className="w-full flex justify-center items-center py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <div className="flex items-center">
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Processing...
+                        Creating Account...
                       </div>
                     ) : (
                       <>
@@ -298,19 +322,19 @@ const SignupPage = () => {
                       </>
                     )}
                   </button>
-                  <div className="flex items-center justify-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <CreditCard className="w-5 h-5 text-gray-400 mr-2" />
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      Secure payment powered by Stripe • SSL encrypted
-                    </span>
-                  </div>
-                  <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                    Already have an account?{" "}
-                    <Link to="/login" className="text-blue-600 hover:text-blue-500 font-medium">
-                      Sign in here
-                    </Link>
-                  </p>
+                </form>
+                <div className="flex items-center justify-center pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
+                  <CreditCard className="w-5 h-5 text-gray-400 mr-2" />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Secure payment powered by Stripe • SSL encrypted
+                  </span>
                 </div>
+                <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+                  Already have an account?{" "}
+                  <Link to="/login" className="text-blue-600 hover:text-blue-500 font-medium">
+                    Sign in here
+                  </Link>
+                </p>
               </div>
             </div>
             <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800">

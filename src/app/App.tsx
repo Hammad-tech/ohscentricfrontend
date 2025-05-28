@@ -7,6 +7,8 @@ import LinksPage from "@/pages/Links/Page";
 import SignupPage from "@/pages/Auth/Signup/Page";
 import LoginPage from "@/pages/Auth/Login/Page";
 import ForgotPasswordPage from "@/pages/Auth/ForgetPassword/Page";
+import { PrivateRoute } from "@/utils/privateRoute";
+import { AuthRoute } from "@/utils/authRoute";
 
 const App: FC = () => {
   return (
@@ -14,11 +16,46 @@ const App: FC = () => {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="chatbot" element={<ChatBotPage />} />
-          <Route path="links" element={<LinksPage />} />
-          <Route path="signup" element={<SignupPage />} />
-          <Route path="login" element={<LoginPage />} />
-          <Route path="forget-password" element={<ForgotPasswordPage />} />
+          <Route 
+            path="chatbot" 
+            element={
+              // <PrivateRoute>
+                <ChatBotPage />
+              // </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="links" 
+            element={
+              <PrivateRoute>
+                <LinksPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="signup" 
+            element={
+              <AuthRoute>
+                <SignupPage />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="login" 
+            element={
+              <AuthRoute>
+                <LoginPage />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="forget-password" 
+            element={
+              <AuthRoute>
+                <ForgotPasswordPage />
+              </AuthRoute>
+            } 
+          />
           <Route path="*" element={<NoMatch />} />
         </Route>
       </Routes>

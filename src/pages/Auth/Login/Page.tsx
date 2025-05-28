@@ -1,38 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, Check, Zap, Shield, FileText, Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/app/context/AuthContext";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
   const navigate = useNavigate();
+  const { login, user, isLoading } = useAuth();
 
-  const handleSubmit = async (e: any) => {
+  useEffect(() => {
+    if (user && !isLoading) {
+      navigate('/chatbot');
+    }
+  }, [user, isLoading, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
 
+    if (!email || !password) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    if (!email.includes('@')) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      if (email === "demo@ohsist.com" && password === "password123") {
-        alert("Login successful! Welcome back to Ohsist.");
-      } else {
+      await login(email, password);
+    } catch (err: any) {
+      if (err.message) {
+        setError(err.message);
+      } else if (err.status === 401) {
         setError("Invalid email or password. Please try again.");
+      } else if (err.status === 429) {
+        setError("Too many login attempts. Please try again later.");
+      } else {
+        setError("Something went wrong. Please try again.");
       }
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleForgotPassword = () => {
-    navigate('/forget-password')
+    navigate('/forget-password');
+  };
+
+  const handleDemoLogin = async () => {
+    setEmail("demo@ohsist.com");
+    setPassword("password123");
+    setError("");
+    
+    try {
+      await login("demo@ohsist.com", "password123");
+    } catch (err: any) {
+      setError(err.message || "Demo login failed. Please try again.");
+    }
   };
 
   return (
@@ -87,14 +116,31 @@ const LoginPage = () => {
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
               <div className="flex items-start">
                 <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3" />
-                <div>
+                <div className="flex-1">
                   <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
                     Try Demo Account
                   </h3>
-                  <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                  <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1 mb-4">
                     <p><strong>Email:</strong> demo@ohsist.com</p>
                     <p><strong>Password:</strong> password123</p>
                   </div>
+                  <button
+                    onClick={handleDemoLogin}
+                    disabled={isLoading}
+                    className="inline-flex items-center px-3 py-2 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-800 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b border-blue-600 mr-2"></div>
+                        Signing in...
+                      </>
+                    ) : (
+                      <>
+                        Quick Demo Login
+                        <ArrowRight className="w-3 h-3 ml-1" />
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
@@ -112,11 +158,11 @@ const LoginPage = () => {
               <div className="p-6 sm:p-8">
                 {error && (
                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-4 rounded-lg mb-6 flex items-center">
-                    <AlertCircle className="w-5 h-5 mr-2" />
-                    {error}
+                    <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                    <span className="text-sm">{error}</span>
                   </div>
                 )}
-                <div className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Email Address
@@ -131,7 +177,8 @@ const LoginPage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                        disabled={isLoading}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="you@company.com"
                       />
                     </div>
@@ -150,13 +197,15 @@ const LoginPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                        disabled={isLoading}
+                        className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="Enter your password"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        disabled={isLoading}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center disabled:opacity-50"
                       >
                         {showPassword ? (
                           <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -173,7 +222,8 @@ const LoginPage = () => {
                         type="checkbox"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                        disabled={isLoading}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                       <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                         Remember me
@@ -182,14 +232,14 @@ const LoginPage = () => {
                     <button
                       type="button"
                       onClick={handleForgotPassword}
-                      className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+                      disabled={isLoading}
+                      className="text-sm text-blue-600 hover:text-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Forgot password?
                     </button>
                   </div>
                   <button
-                    type="button"
-                    onClick={handleSubmit}
+                    type="submit"
                     disabled={isLoading}
                     className="w-full flex justify-center items-center py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                   >
@@ -205,6 +255,8 @@ const LoginPage = () => {
                       </>
                     )}
                   </button>
+                </form>
+                <div className="mt-6">
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-gray-300 dark:border-gray-600" />
@@ -215,10 +267,13 @@ const LoginPage = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="text-center">
+                  <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       Don't have an account?{" "}
-                      <Link to='/signup' className="text-blue-600 hover:text-blue-500 font-medium">
+                      <Link 
+                        to='/signup' 
+                        className="text-blue-600 hover:text-blue-500 font-medium"
+                      >
                         Create free account
                       </Link>
                     </p>
@@ -236,6 +291,11 @@ const LoginPage = () => {
                   <p className="text-sm text-green-700 dark:text-green-300">
                     Protected by SSL encryption and enterprise-grade security.
                   </p>
+                  {user && (
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Welcome back, {user.name || user.email}!
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

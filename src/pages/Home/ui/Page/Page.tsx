@@ -9,7 +9,7 @@ const Home: FC = () => {
   return (
     <div className="mx-auto space-y-8">
       <Hero />
-      <ChatBot />
+      {/* <ChatBot /> */}
       <Features />
       <Pricing />
       <Footer />

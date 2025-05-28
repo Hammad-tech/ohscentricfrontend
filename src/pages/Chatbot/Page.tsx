@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Bot, User, Menu, Settings, Crown, Zap, MessageSquare, Calendar, Plus } from "lucide-react";
+import { Send, Bot, User, Menu, Settings, Crown, Zap, MessageSquare, Calendar, Plus, Trash } from "lucide-react";
+import { sendMessageToGPT, streamMessageFromGPT } from "@/app/services/openaiService";
 
 const ChatBotPage = () => {
   const [message, setMessage] = useState("");
+  const [apiError, setApiError] = useState(null);
   const [chatHistory, setChatHistory] = useState([
     { 
       sender: "bot", 
@@ -56,7 +58,7 @@ const ChatBotPage = () => {
     return getDaysRemaining() > 0 && getChatsRemaining() > 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     if (e) e.preventDefault();
     
     if (!message.trim()) return;
@@ -82,25 +84,82 @@ const ChatBotPage = () => {
       lastDate: new Date().toDateString()
     }));
 
-    setTimeout(() => {
-      const responses = [
-        "Based on OSHA regulations, here are the key safety requirements for your workplace situation...",
-        "For workplace safety compliance, I recommend the following steps and documentation...",
-        "According to current safety standards, this situation requires specific protocols...",
-        "Here's what you need to know about workplace safety in this context...",
-        "The safety regulations for this scenario involve several important considerations..."
-      ];
-      
+    try {
+      const apiMessages = chatHistory.map(msg => ({
+        role: msg.sender === "bot" ? "assistant" : "user",
+        content: msg.message
+      }));
+      apiMessages.push({
+        role: "user",
+        content: message.trim()
+      });
+
+      if (chatHistory.length === 1) {
+        apiMessages.unshift({
+          role: "system",
+          content: "You are Ohsist, an AI workplace safety assistant..."
+        });
+      }
+
       const botMessage = {
         sender: "bot",
-        message: responses[Math.floor(Math.random() * responses.length)] + " This is a demo response showcasing how Ohsist provides detailed, accurate workplace safety guidance based on current regulations and best practices.",
+        message: "",
         timestamp: new Date()
       };
-      
+    
       setChatHistory(prev => [...prev, botMessage]);
+    
+      await streamMessageFromGPT(apiMessages, (content: any) => {
+        setChatHistory(prev => {
+          const newHistory = [...prev];
+          newHistory[newHistory.length - 1].message = content;
+          return newHistory;
+        });
+      });
+    } catch (error) {
+      setApiError(error.message);
+      const errorMessage = {
+        sender: "bot",
+        message: "Sorry, I encountered an error while processing your request. Please try again.",
+        timestamp: new Date()
+      };
+      setChatHistory(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 2000);
+    }
   };
+
+  useEffect(() => {
+    const savedChat = localStorage.getItem('ohsist_chat_history');
+    if (savedChat) {
+      try {
+        const parsed = JSON.parse(savedChat);
+        const withDates = parsed.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        setChatHistory(withDates);
+      } catch (e) {
+        console.error('Failed to parse saved chat', e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (chatHistory.length > 1) {
+      const forStorage = chatHistory.map(msg => ({
+        ...msg,
+        timestamp: msg.timestamp.toISOString()
+      }));
+      localStorage.setItem('ohsist_chat_history', JSON.stringify(forStorage));
+    }
+  }, [chatHistory]);
+
+  {apiError && (
+    <div className="max-w-3xl mx-auto px-4 py-2 bg-red-50 text-red-600 rounded-lg mb-4 text-sm">
+      Error: {apiError}
+    </div>
+  )}
 
   const UpgradeModal = () => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -208,9 +267,20 @@ const ChatBotPage = () => {
                 <Settings className="w-4 h-4 mr-3" />
                 Compliance Check
               </button>
+              <button 
+                onClick={() => {
+                  if (confirm('Are you sure you want to clear this conversation?')) {
+                    setChatHistory([chatHistory[0]]);
+                    localStorage.removeItem('ohsist_chat_history');
+                  }
+                }}
+                className="w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center text-sm"
+              >
+                <Trash className="w-4 h-4 mr-3" />
+                Clear Conversation
+              </button>
             </div>
           </div>
-
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <button 
               onClick={() => setShowUpgradeModal(true)}
@@ -222,7 +292,6 @@ const ChatBotPage = () => {
           </div>
         </div>
       </div>
-
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <div className="flex items-center space-x-4">
