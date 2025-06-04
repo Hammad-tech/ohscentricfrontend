@@ -1,6 +1,7 @@
 import { FC } from "react";
-import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, Notebook, AlertCircle, Radio, Video, Bot, Link, LogIn, UserPlus } from "lucide-react";
+import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, Notebook, AlertCircle, Radio, Video, Bot, Link, LogIn, UserPlus, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/app/context/AuthContext";
 
 interface SidebarLinkProps {
   icon: React.ReactNode;
@@ -68,9 +69,19 @@ const Sidebar: FC<SidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const isActiveRoute = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (
@@ -86,7 +97,7 @@ const Sidebar: FC<SidebarProps> = ({
           isCollapsed && !isMobile ? "w-20" : "w-64"
         } ${isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : ""}`}
       >
-        <div className="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between p-4">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
@@ -127,6 +138,7 @@ const Sidebar: FC<SidebarProps> = ({
             )}
           </button>
         </div>
+        
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-1">
           <SidebarLink 
             onClick={() => navigate('/')} 
@@ -166,21 +178,35 @@ const Sidebar: FC<SidebarProps> = ({
           <SidebarLink icon={<HelpCircle />} text="Help & Support" isCollapsed={isCollapsed} />
           <SidebarLink icon={<Settings />} text="Settings" isCollapsed={isCollapsed} />
         </div>
+        
         <div className="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1">
-          <SidebarLink 
-            onClick={() => navigate('/login')} 
-            icon={<LogIn />} 
-            text="Login" 
-            active={isActiveRoute('/login')} 
-            isCollapsed={isCollapsed} 
-          />
-          <SidebarLink 
-            onClick={() => navigate('/signup')} 
-            icon={<UserPlus />} 
-            text="Sign Up" 
-            active={isActiveRoute('/signup')} 
-            isCollapsed={isCollapsed} 
-          />
+          {user ? (
+            // Show logout when user is logged in
+            <SidebarLink 
+              onClick={handleLogout}
+              icon={<LogOut />} 
+              text="Logout" 
+              isCollapsed={isCollapsed} 
+            />
+          ) : (
+            // Show login/signup when user is not logged in
+            <>
+              <SidebarLink 
+                onClick={() => navigate('/login')} 
+                icon={<LogIn />} 
+                text="Login" 
+                active={isActiveRoute('/login')} 
+                isCollapsed={isCollapsed} 
+              />
+              <SidebarLink 
+                onClick={() => navigate('/signup')} 
+                icon={<UserPlus />} 
+                text="Sign Up" 
+                active={isActiveRoute('/signup')} 
+                isCollapsed={isCollapsed} 
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

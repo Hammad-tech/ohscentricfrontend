@@ -7,6 +7,8 @@ import LinksPage from "@/pages/Links/Page";
 import SignupPage from "@/pages/Auth/Signup/Page";
 import LoginPage from "@/pages/Auth/Login/Page";
 import ForgotPasswordPage from "@/pages/Auth/ForgetPassword/Page";
+import PaymentSuccessPage from "@/pages/Payment/Success/Page";
+import PaymentCancelPage from "@/pages/Payment/Cancel/Page";
 import { PrivateRoute } from "@/utils/privateRoute";
 import { AuthRoute } from "@/utils/authRoute";
 
@@ -19,9 +21,9 @@ const App: FC = () => {
           <Route 
             path="chatbot" 
             element={
-              // <PrivateRoute>
+              <PrivateRoute>
                 <ChatBotPage />
-              // </PrivateRoute>
+              </PrivateRoute>
             } 
           />
           <Route 
@@ -29,6 +31,22 @@ const App: FC = () => {
             element={
               <PrivateRoute>
                 <LinksPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="payment/success" 
+            element={
+              <PrivateRoute>
+                <PaymentSuccessPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="payment/cancel" 
+            element={
+              <PrivateRoute>
+                <PaymentCancelPage />
               </PrivateRoute>
             } 
           />

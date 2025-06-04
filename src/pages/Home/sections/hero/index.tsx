@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { FC, useState } from "react";
 import { ChevronRight, ShieldCheck, MessageSquareText, Users } from "lucide-react";
 import HeroImage from '@/app/assets/images/hero.svg'
+import { useNavigate } from "react-router-dom";
 
-const Hero = () => {
+const Hero: FC = () => {
   const [isHoveredPrimary, setIsHoveredPrimary] = useState(false);
   const [isHoveredSecondary, setIsHoveredSecondary] = useState(false);
+  const navigate = useNavigate();
+
+  const handleTryForFree = () => {
+    navigate('/chatbot');
+  };
 
   return (
     <section className="relative pt-10 pb-20 overflow-hidden bg-gradient-to-br bg-blue-600">
@@ -32,6 +38,7 @@ const Hero = () => {
                 className={`group px-8 py-4 bg-white text-blue-700 font-semibold rounded-lg shadow-lg transition-all duration-300 flex items-center justify-center ${isHoveredPrimary ? "bg-opacity-90 transform -translate-y-1" : ""}`}
                 onMouseEnter={() => setIsHoveredPrimary(true)}
                 onMouseLeave={() => setIsHoveredPrimary(false)}
+                onClick={handleTryForFree}
               >
                 Try For Free
                 <ChevronRight 

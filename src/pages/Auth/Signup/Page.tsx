@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { ArrowRight, Check, Zap, Shield, FileText, Headset, CreditCard, Star, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/app/context/AuthContext";
+import stripeService from "@/app/services/stripeService";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ const SignupPage = () => {
   const [selectedPlan, setSelectedPlan] = useState("professional");
   const [error, setError] = useState("");
   const [isGoogleSignup, setIsGoogleSignup] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const navigate = useNavigate();
   const googleButtonRef = useRef<HTMLDivElement>(null);
   
@@ -52,17 +54,28 @@ const SignupPage = () => {
     }
 
     try {
+      // Create account first
       await signup(name.trim(), email.trim(), password, selectedPlan);
       
-      if (selectedPlan === "enterprise") {
+      if (selectedPlan === "professional") {
+        // Redirect to Stripe for payment
+        setIsProcessingPayment(true);
+        const successUrl = `${window.location.origin}/payment/success`;
+        const cancelUrl = `${window.location.origin}/payment/cancel`;
+        
+        await stripeService.upgradeToProffesional(successUrl, cancelUrl);
+        // User will be redirected to Stripe Checkout
+      } else if (selectedPlan === "enterprise") {
         alert("Enterprise plan selected! We'll contact you shortly at " + email);
+        navigate("/chatbot");
       } else {
-        alert(`${selectedPlan === "starter" ? "Free account" : "Premium subscription"} created successfully!`);
+        // Starter plan - go directly to chatbot
+        alert("Free account created successfully!");
+        navigate("/chatbot");
       }
       
-      navigate("/chatbot");
-      
     } catch (err) {
+      setIsProcessingPayment(false);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -78,15 +91,25 @@ const SignupPage = () => {
     try {
       await signupWithGoogle(selectedPlan);
       
-      if (selectedPlan === "enterprise") {
+      if (selectedPlan === "professional") {
+        // Redirect to Stripe for payment
+        setIsProcessingPayment(true);
+        const successUrl = `${window.location.origin}/payment/success`;
+        const cancelUrl = `${window.location.origin}/payment/cancel`;
+        
+        await stripeService.upgradeToProffesional(successUrl, cancelUrl);
+        // User will be redirected to Stripe Checkout
+      } else if (selectedPlan === "enterprise") {
         alert("Enterprise plan selected! We'll contact you shortly.");
+        navigate("/chatbot");
       } else {
-        alert(`${selectedPlan === "starter" ? "Free account" : "Premium subscription"} created successfully!`);
+        // Starter plan - go directly to chatbot
+        alert("Free account created successfully!");
+        navigate("/chatbot");
       }
       
-      navigate("/chatbot");
-      
     } catch (err) {
+      setIsProcessingPayment(false);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -131,6 +154,20 @@ const SignupPage = () => {
       buttonStyle: "border border-gray-300 text-gray-700 hover:bg-gray-50"
     }
   ];
+
+  const getButtonText = () => {
+    if (isLoading || isProcessingPayment) {
+      return "Processing...";
+    }
+    
+    if (selectedPlan === "starter") {
+      return "Create Free Account";
+    } else if (selectedPlan === "enterprise") {
+      return "Contact Sales Team";
+    } else {
+      return "Continue to Payment";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -320,6 +357,21 @@ const SignupPage = () => {
                       required
                       disabled={isLoading}
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="you@company.com"
                     />
                   </div>
@@ -381,22 +433,17 @@ const SignupPage = () => {
                   </div>
                   <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || isProcessingPayment}
                     className="w-full flex justify-center items-center py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? (
+                    {isLoading || isProcessingPayment ? (
                       <div className="flex items-center">
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Creating Account...
+                        {isProcessingPayment ? "Redirecting to payment..." : "Creating Account..."}
                       </div>
                     ) : (
                       <>
-                        {selectedPlan === "starter" 
-                          ? "Create Free Account" 
-                          : selectedPlan === "enterprise"
-                          ? "Contact Sales Team"
-                          : "Continue to Payment"
-                        }
+                        {getButtonText()}
                         <ArrowRight className="w-5 h-5 ml-2" />
                       </>
                     )}

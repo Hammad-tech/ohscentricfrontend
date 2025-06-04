@@ -1,34 +1,31 @@
 import { useState, useEffect, useRef } from "react";
 import { Send, Bot, User, Menu, Settings, Crown, Zap, MessageSquare, Calendar, Plus, Trash } from "lucide-react";
-import { sendMessageToGPT, streamMessageFromGPT } from "@/app/services/openaiService";
+import { sendMessageToChatbot, testConnection } from "@/app/services/chatbotService";
+import { useAuth } from "@/app/context/AuthContext";
+import { useTrialData } from "@/app/hooks/useTrialData";
+import stripeService from "@/app/services/stripeService";
 
 const ChatBotPage = () => {
   const [message, setMessage] = useState("");
-  const [apiError, setApiError] = useState(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [chatHistory, setChatHistory] = useState([
     { 
       sender: "bot", 
-      message: "👋 Welcome to Ohsist! I'm your AI workplace safety assistant. I can help you with safety regulations, compliance questions, risk assessments, and best practices. What would you like to know?",
+      message: "👋 Welcome to Safety Chatbot! I'm your AI safety assistant. I can help you with safety regulations, compliance questions, risk assessments, and best practices. What would you like to know?",
       timestamp: new Date()
     }
   ]);
   
-  const [trialData, setTrialData] = useState(() => {
-    const startDate = new Date();
-    const today = new Date().toDateString();
-    
-    return {
-      startDate,
-      chatsUsedToday: 0,
-      lastDate: today,
-      isActive: true
-    };
-  });
+  // Use the new trial data hook
+  const { user, getAuthToken } = useAuth();
+  const { trialData, loading: trialLoading, refreshTrialData } = useTrialData();
   
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -38,30 +35,102 @@ const ChatBotPage = () => {
     scrollToBottom();
   }, [chatHistory, isTyping]);
 
+  // Test connection to FastAPI backend on component mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      const token = await getAuthToken();
+      const connected = await testConnection(token);
+      setIsConnected(connected);
+      if (!connected) {
+        setApiError("Cannot connect to the chatbot backend. Please make sure your FastAPI server is running on http://127.0.0.1:8000");
+      } else {
+        setApiError(null);
+      }
+    };
+    checkConnection();
+  }, [getAuthToken]);
+
   const getDaysRemaining = () => {
-    const startDate = new Date(trialData.startDate);
-    const currentDate = new Date();
-    const diffTime = currentDate - startDate;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    return Math.max(0, 3 - diffDays);
+    return trialData?.trialDaysRemaining || 0;
   };
 
   const getChatsRemaining = () => {
-    return Math.max(0, 3 - trialData.chatsUsedToday);
+    if (!trialData) return 0;
+    if (trialData.plan === 'professional' || trialData.plan === 'admin') return Infinity;
+    if (trialData.isUnlimited) return Infinity;
+    return Math.max(0, trialData.dailyLimit - trialData.chatsUsedToday);
   };
 
   const isTrialExpired = () => {
-    return getDaysRemaining() === 0 && getChatsRemaining() === 0;
+    if (!trialData) return true;
+    return !trialData.isActive || (getDaysRemaining() === 0 && getChatsRemaining() === 0);
   };
 
   const canSendMessage = () => {
-    return getDaysRemaining() > 0 && getChatsRemaining() > 0;
+    if (!trialData) return false;
+    if (!trialData.isActive) return false;
+    if (trialData.isUnlimited) return true;
+    return getChatsRemaining() > 0;
   };
 
-  const handleSubmit = async (e: any) => {
+  const getStatusMessage = () => {
+    if (!trialData) return "Loading...";
+    
+    if (trialData.plan === 'admin') {
+      return '🔧 Admin Account - Unlimited Access';
+    }
+    
+    if (trialData.plan === 'professional') {
+      return '💼 Professional Plan - Unlimited Messages';
+    }
+    
+    // For free/starter users
+    if (!canSendMessage()) {
+      return '🚫 Daily limit reached';
+    }
+
+    return `💬 ${getChatsRemaining()} messages remaining today`;
+  };
+
+  const getTrialMessage = () => {
+    if (!trialData || trialData.plan === 'admin' || trialData.plan === 'professional') return null;
+    
+    if (trialData.trialDaysRemaining === -1) {
+      return '♾️ Lifetime access';
+    }
+    
+    if (trialData.trialDaysRemaining === 0) {
+      return '⚠️ Trial expired';
+    }
+    
+    return `📅 ${trialData.trialDaysRemaining} trial days remaining`;
+  };
+
+  const handleUpgradeToProffesional = async () => {
+    setIsUpgrading(true);
+    try {
+      const successUrl = `${window.location.origin}/payment/success`;
+      const cancelUrl = `${window.location.origin}/payment/cancel`;
+      
+      await stripeService.upgradeToProffesional(successUrl, cancelUrl);
+      // User will be redirected to Stripe Checkout
+    } catch (error) {
+      console.error('Failed to start upgrade process:', error);
+      setApiError('Failed to start upgrade process. Please try again.');
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
+
+  const handleSubmit = async (e?: any) => {
     if (e) e.preventDefault();
     
     if (!message.trim()) return;
+    
+    if (!isConnected) {
+      setApiError("Not connected to the backend. Please check if your FastAPI server is running.");
+      return;
+    }
     
     if (!canSendMessage()) {
       setShowUpgradeModal(true);
@@ -74,86 +143,98 @@ const ChatBotPage = () => {
       timestamp: new Date()
     };
     
-    setChatHistory(prev => [...prev, userMessage]);
+    // Create the updated history that includes the current user message
+    const updatedHistory = [...chatHistory, userMessage];
+    
+    setChatHistory(updatedHistory);
+    const currentMessage = message.trim();
     setMessage("");
     setIsTyping(true);
-
-    setTrialData(prev => ({
-      ...prev,
-      chatsUsedToday: prev.chatsUsedToday + 1,
-      lastDate: new Date().toDateString()
-    }));
+    setApiError(null);
 
     try {
-      const apiMessages = chatHistory.map(msg => ({
-        role: msg.sender === "bot" ? "assistant" : "user",
-        content: msg.message
-      }));
-      apiMessages.push({
-        role: "user",
-        content: message.trim()
-      });
-
-      if (chatHistory.length === 1) {
-        apiMessages.unshift({
-          role: "system",
-          content: "You are Ohsist, an AI workplace safety assistant..."
-        });
-      }
-
+      // Use the new FastAPI service with auth
+      const token = await getAuthToken();
+      const response = await sendMessageToChatbot(
+        currentMessage, 
+        updatedHistory, // ✅ Now passing the complete history including current user message
+        token, 
+        user?.id
+      );
+      
       const botMessage = {
         sender: "bot",
-        message: "",
+        message: response,
         timestamp: new Date()
       };
-    
+      
       setChatHistory(prev => [...prev, botMessage]);
-    
-      await streamMessageFromGPT(apiMessages, (content: any) => {
-        setChatHistory(prev => {
-          const newHistory = [...prev];
-          newHistory[newHistory.length - 1].message = content;
-          return newHistory;
-        });
-      });
+      
+      // Refresh trial data to update usage count
+      refreshTrialData();
+      
     } catch (error) {
-      setApiError(error.message);
-      const errorMessage = {
+      console.error('Chat error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setApiError(`Error: ${errorMessage}`);
+      const botErrorMessage = {
         sender: "bot",
-        message: "Sorry, I encountered an error while processing your request. Please try again.",
+        message: "Sorry, I encountered an error while processing your request. Please make sure the FastAPI backend is running and try again.",
         timestamp: new Date()
       };
-      setChatHistory(prev => [...prev, errorMessage]);
+      setChatHistory(prev => [...prev, botErrorMessage]);
     } finally {
       setIsTyping(false);
     }
   };
 
+  // Load user-specific chat history (this would come from your backend)
   useEffect(() => {
-    const savedChat = localStorage.getItem('ohsist_chat_history');
-    if (savedChat) {
+    const loadUserChatHistory = async () => {
+      if (!user) return;
+      
       try {
-        const parsed = JSON.parse(savedChat);
-        const withDates = parsed.map((msg: any) => ({
+        // TODO: Replace with actual API call to load user's chat history
+        // For now, using localStorage with user-specific key as fallback
+        const userChatKey = `chat_history_${user.id}`;
+        const savedChat = localStorage.getItem(userChatKey);
+        if (savedChat) {
+          try {
+            const parsed = JSON.parse(savedChat);
+            const withDates = parsed.map((msg: any) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp)
+            }));
+            setChatHistory(withDates);
+          } catch (e) {
+            console.error('Failed to parse saved chat', e);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load user chat history:', error);
+      }
+    };
+
+    loadUserChatHistory();
+  }, [user]);
+
+  // Save user-specific chat history
+  useEffect(() => {
+    if (chatHistory.length > 1 && user) {
+      try {
+        // TODO: Replace with actual API call to save user's chat history
+        // For now, using localStorage with user-specific key as fallback
+        const userChatKey = `chat_history_${user.id}`;
+        const forStorage = chatHistory.map(msg => ({
           ...msg,
-          timestamp: new Date(msg.timestamp)
+          timestamp: msg.timestamp.toISOString()
         }));
-        setChatHistory(withDates);
-      } catch (e) {
-        console.error('Failed to parse saved chat', e);
+        localStorage.setItem(userChatKey, JSON.stringify(forStorage));
+      } catch (error) {
+        console.error('Failed to save user chat history:', error);
       }
     }
-  }, []);
-
-  useEffect(() => {
-    if (chatHistory.length > 1) {
-      const forStorage = chatHistory.map(msg => ({
-        ...msg,
-        timestamp: msg.timestamp.toISOString()
-      }));
-      localStorage.setItem('ohsist_chat_history', JSON.stringify(forStorage));
-    }
-  }, [chatHistory]);
+  }, [chatHistory, user]);
 
   {apiError && (
     <div className="max-w-3xl mx-auto px-4 py-2 bg-red-50 text-red-600 rounded-lg mb-4 text-sm">
@@ -180,7 +261,7 @@ const ChatBotPage = () => {
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 mb-6">
           <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
             <Zap className="w-5 h-5 text-blue-600 mr-2" />
-            Premium Features
+            Professional Plan - $19/month
           </h4>
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-center">
@@ -202,8 +283,19 @@ const ChatBotPage = () => {
           </ul>
         </div>
         <div className="space-y-3">
-          <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg">
-            Upgrade to Premium
+          <button 
+            onClick={handleUpgradeToProffesional}
+            disabled={isUpgrading}
+            className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isUpgrading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Processing...
+              </div>
+            ) : (
+              'Upgrade to Professional'
+            )}
           </button>
           <button 
             onClick={() => setShowUpgradeModal(false)}
@@ -235,21 +327,42 @@ const ChatBotPage = () => {
               </button>
             </div>
             <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Free Trial</span>
-                <div className="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
-                  {getDaysRemaining()} days
-                </div>
-              </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                {trialData.chatsUsedToday}/3 chats used today
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                <div 
-                  className="bg-blue-500 h-1.5 rounded-full transition-all"
-                  style={{ width: `${(trialData.chatsUsedToday / 3) * 100}%` }}
-                ></div>
-              </div>
+              {trialData?.plan === 'professional' ? (
+                // Professional Plan Display
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Professional Plan</span>
+                    <div className="px-2 py-1 bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">
+                      Active
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                    Unlimited conversations
+                  </div>
+                  <div className="w-full bg-green-200 dark:bg-green-700 rounded-full h-1.5">
+                    <div className="bg-green-500 h-1.5 rounded-full w-full"></div>
+                  </div>
+                </>
+              ) : (
+                // Free Trial Display
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Free Trial</span>
+                    <div className="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
+                      {getDaysRemaining()} days
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                    {trialData?.chatsUsedToday || 0}/{trialData?.dailyLimit || 3} chats used today
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                    <div 
+                      className="bg-blue-500 h-1.5 rounded-full transition-all"
+                      style={{ width: `${trialData ? (trialData.chatsUsedToday / trialData.dailyLimit) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -271,7 +384,9 @@ const ChatBotPage = () => {
                 onClick={() => {
                   if (confirm('Are you sure you want to clear this conversation?')) {
                     setChatHistory([chatHistory[0]]);
-                    localStorage.removeItem('ohsist_chat_history');
+                    if (user) {
+                      localStorage.removeItem(`chat_history_${user.id}`);
+                    }
                   }
                 }}
                 className="w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center text-sm"
@@ -282,13 +397,15 @@ const ChatBotPage = () => {
             </div>
           </div>
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <button 
-              onClick={() => setShowUpgradeModal(true)}
-              className="w-full p-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all flex items-center justify-center text-sm"
-            >
-              <Crown className="w-4 h-4 mr-2" />
-              Upgrade to Pro
-            </button>
+            {trialData?.plan !== 'professional' && (
+              <button 
+                onClick={() => setShowUpgradeModal(true)}
+                className="w-full p-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all flex items-center justify-center text-sm"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade to Pro
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -304,7 +421,7 @@ const ChatBotPage = () => {
             <h1 className="font-semibold text-gray-800 dark:text-white">Ohsist AI</h1>
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            {getChatsRemaining()} free messages left
+            {getStatusMessage()}
           </div>
         </div>
         <div className="flex-1 overflow-hidden">
@@ -397,11 +514,31 @@ const ChatBotPage = () => {
           </div>
         </div>
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-          {!canSendMessage() && (
+          {!isConnected && (
+            <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
+              <div className="max-w-3xl mx-auto flex items-center justify-between">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  Not connected to backend. Please make sure your FastAPI server is running on http://127.0.0.1:8000
+                </p>
+                <button 
+                  onClick={async () => {
+                    const token = await getAuthToken();
+                    const connected = await testConnection(token);
+                    setIsConnected(connected);
+                    if (connected) setApiError(null);
+                  }}
+                  className="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          )}
+          {isConnected && !canSendMessage() && (
             <div className="px-4 py-3 bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-200 dark:border-yellow-800">
               <div className="max-w-3xl mx-auto flex items-center justify-between">
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  {isTrialExpired() ? "Your free trial has ended." : "You've reached today's chat limit."}
+                  {getTrialMessage()}
                 </p>
                 <button 
                   onClick={() => setShowUpgradeModal(true)}
@@ -418,10 +555,16 @@ const ChatBotPage = () => {
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder={canSendMessage() ? "Ask about workplace safety..." : "Upgrade to continue chatting..."}
-                  disabled={!canSendMessage()}
+                  placeholder={
+                    !isConnected 
+                      ? "Connect to backend to start chatting..." 
+                      : canSendMessage() 
+                        ? "Ask about workplace safety..." 
+                        : "Upgrade to continue chatting..."
+                  }
+                  disabled={!canSendMessage() || !isConnected}
                   className="w-full p-4 pr-16 border border-gray-300 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:text-gray-400"
-                  rows="1"
+                  rows={1}
                   style={{
                     minHeight: '56px',
                     maxHeight: '200px',
@@ -434,14 +577,15 @@ const ChatBotPage = () => {
                     }
                   }}
                   onInput={(e) => {
-                    e.target.style.height = 'auto';
-                    e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto';
+                    target.style.height = Math.min(target.scrollHeight, 200) + 'px';
                   }}
                 />
                 <button 
                   type="button"
                   onClick={handleSubmit}
-                  disabled={!message.trim() || !canSendMessage()}
+                  disabled={!message.trim() || !canSendMessage() || !isConnected}
                   className="absolute right-3 bottom-3 p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 >
                   <Send className="w-5 h-5" />

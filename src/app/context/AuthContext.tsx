@@ -90,8 +90,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [isGoogleLoaded]);
 
   const handleGoogleResponse = async (response: any) => {
+    console.log('Google response received:', response);
     try {
       setIsLoading(true);
+      console.log('Making API call to:', `${API_URL}/auth/google`);
       const res = await fetch(`${API_URL}/auth/google`, {
         method: 'POST',
         headers: {
@@ -102,12 +104,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }),
       });
 
+      console.log('API response status:', res.status);
       if (!res.ok) {
         const errorData = await res.json();
+        console.error('API error response:', errorData);
         throw new Error(errorData.message || 'Google login failed');
       }
 
       const data = await res.json();
+      console.log('API success response:', data);
       const user: User = {
         id: data.user.id,
         email: data.user.email,
@@ -115,10 +120,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       };
 
       setUser(user);
+      console.log('User set in context:', user);
       await webStorage.setItemAsync('user', JSON.stringify(user));
       
       if (data.token) {
         await webStorage.setItemAsync('authToken', data.token);
+        console.log('Token stored successfully');
       }
     } catch (error) {
       console.error('Google login failed:', error);

@@ -33,7 +33,9 @@ const LoginPage = () => {
   }, [isGoogleLoaded]);
 
   useEffect(() => {
+    console.log('Login page useEffect - user:', user, 'isLoading:', isLoading);
     if (user && !isLoading) {
+      console.log('Redirecting to chatbot...');
       navigate('/chatbot');
     }
   }, [user, isLoading, navigate]);
@@ -88,18 +90,6 @@ const LoginPage = () => {
     navigate('/forget-password');
   };
 
-  const handleDemoLogin = async () => {
-    setEmail("demo@ohsist.com");
-    setPassword("password123");
-    setError("");
-    
-    try {
-      await login("demo@ohsist.com", "password123");
-    } catch (err: any) {
-      setError(err.message || "Demo login failed. Please try again.");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -146,37 +136,6 @@ const LoginPage = () => {
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Document Analysis</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Smart safety audits</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
-              <div className="flex items-start">
-                <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3" />
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
-                    Try Demo Account
-                  </h3>
-                  <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1 mb-4">
-                    <p><strong>Email:</strong> demo@ohsist.com</p>
-                    <p><strong>Password:</strong> password123</p>
-                  </div>
-                  <button
-                    onClick={handleDemoLogin}
-                    disabled={isLoading}
-                    className="inline-flex items-center px-3 py-2 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-800 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
-                        Signing in...
-                      </>
-                    ) : (
-                      <>
-                        Quick Demo Login
-                        <ArrowRight className="w-3 h-3 ml-1" />
-                      </>
-                    )}
-                  </button>
                 </div>
               </div>
             </div>
