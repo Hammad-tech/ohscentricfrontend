@@ -5,6 +5,8 @@ import App from "./App.tsx";
 import "./index.css";
 import { AuthProvider } from "./context/AuthContext.tsx";
 
+
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <BrowserRouter>
     <AuthProvider>
