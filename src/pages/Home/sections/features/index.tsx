@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const Features: FC = () => {
   const navigate = useNavigate();
 
-  const handleOhsistClick = () => {
+  const handleOhscentricClick = () => {
     navigate('/chatbot');
   };
 
@@ -22,8 +22,8 @@ const Features: FC = () => {
     },
     {
       icon: BarChart3,
-      title: "Risk Assessment Tools",
-      description: "Conduct comprehensive risk assessments with guided templates and automated reporting to ensure nothing falls through the cracks."
+      title: "Safety Training Management",
+      description: "Streamline your safety training programs with automated tracking, certification management, and compliance reporting."
     },
     {
       icon: FileText,
@@ -47,7 +47,7 @@ const Features: FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <span className="inline-block px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 rounded-full mb-4">
-            Why Ohsist?
+            Why Ohscentric?
           </span>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Transform Your Workplace Safety
@@ -77,10 +77,10 @@ const Features: FC = () => {
         </div>
         <div className="mt-16 text-center">
           <button 
-            onClick={handleOhsistClick}
+            onClick={handleOhscentricClick}
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
           >
-            Try Ohsist Now
+            Try Ohscentric Now
             <svg className="w-5 h-5 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>

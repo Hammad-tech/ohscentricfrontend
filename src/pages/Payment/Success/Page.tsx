@@ -37,7 +37,7 @@ const PaymentSuccessPage: FC = () => {
         </h1>
         
         <p className="text-gray-600 mb-6">
-          Welcome to Ohsist Professional! Your subscription has been activated and you now have unlimited access to our AI safety assistant.
+          Welcome to Ohscentric Professional! Your subscription has been activated and you now have unlimited access to our AI safety assistant.
         </p>
 
         {/* Professional Plan Features */}
@@ -77,7 +77,7 @@ const PaymentSuccessPage: FC = () => {
             to="/chatbot"
             className="w-full flex items-center justify-center py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg"
           >
-            Start Using Ohsist AI
+            Start Using Ohscentric
             <ArrowRight className="w-5 h-5 ml-2" />
           </Link>
           
@@ -90,8 +90,8 @@ const PaymentSuccessPage: FC = () => {
         <div className="mt-6 pt-6 border-t border-gray-200">
           <p className="text-xs text-gray-500">
             Need help? Contact our support team at{" "}
-            <a href="mailto:support@ohsist.com" className="text-blue-600 hover:underline">
-              support@ohsist.com
+            <a href="mailto:support@ohscentric.com" className="text-blue-600 hover:underline">
+              support@ohscentric.com
             </a>
           </p>
         </div>
