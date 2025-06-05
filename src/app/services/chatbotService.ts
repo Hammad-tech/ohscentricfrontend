@@ -85,7 +85,9 @@ export const sendMessageToChatbot = async (
 
 export const getTrialData = async (authToken: string): Promise<TrialData> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/user/trial-data`, {
+    // Construct the API URL - if FASTAPI_URL already includes /api, use it; otherwise append /api
+    const baseUrl = API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`;
+    const response = await fetch(`${baseUrl}/user/trial-data`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${authToken}`,

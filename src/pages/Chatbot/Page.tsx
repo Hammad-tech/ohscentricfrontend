@@ -42,7 +42,8 @@ const ChatBotPage = () => {
       const connected = await testConnection(token);
       setIsConnected(connected);
       if (!connected) {
-        setApiError("Cannot connect to the chatbot backend. Please make sure your FastAPI server is running on http://127.0.0.1:8000");
+        const apiUrl = import.meta.env.VITE_FASTAPI_URL || 'http://127.0.0.1:8000';
+        setApiError(`Cannot connect to the chatbot backend. Please make sure your FastAPI server is running on ${apiUrl}`);
       } else {
         setApiError(null);
       }
@@ -518,7 +519,7 @@ const ChatBotPage = () => {
             <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
               <div className="max-w-3xl mx-auto flex items-center justify-between">
                 <p className="text-sm text-red-800 dark:text-red-200">
-                  Not connected to backend. Please make sure your FastAPI server is running on http://127.0.0.1:8000
+                  Not connected to backend. Please make sure your FastAPI server is running on {import.meta.env.VITE_FASTAPI_URL || 'http://127.0.0.1:8000'}
                 </p>
                 <button 
                   onClick={async () => {
