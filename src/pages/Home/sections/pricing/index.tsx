@@ -1,6 +1,24 @@
 import { Check, Zap, Star, Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import stripeService from "@/app/services/stripeService";
 
 const Pricing = () => {
+  const navigate = useNavigate();
+
+  const handleStarterClick = () => {
+    navigate('/chatbot');
+  };
+
+  const handleProfessionalClick = async () => {
+    try {
+      const successUrl = `${window.location.origin}/payment/success`;
+      const cancelUrl = `${window.location.origin}/payment/cancel`;
+      await stripeService.upgradeToProffesional(successUrl, cancelUrl);
+    } catch (error) {
+      console.error('Failed to start upgrade process:', error);
+    }
+  };
+
   const plans = [
     {
       name: "Starter",
@@ -16,7 +34,8 @@ const Pricing = () => {
       ],
       button: "Get Started",
       popular: false,
-      icon: <Star size={20} className="text-blue-500" />
+      icon: <Star size={20} className="text-blue-500" />,
+      onClick: handleStarterClick
     },
     {
       name: "Professional",
@@ -32,7 +51,8 @@ const Pricing = () => {
       ],
       button: "Subscribe Now",
       popular: true,
-      icon: <Zap size={20} className="text-yellow-500" />
+      icon: <Zap size={20} className="text-yellow-500" />,
+      onClick: handleProfessionalClick
     },
     {
       name: "Enterprise",
@@ -44,9 +64,10 @@ const Pricing = () => {
         "Company-wide access",
         "Custom safety protocols",
       ],
-      button: "Subscribe Now",
+      button: "Contact Sales",
       popular: false,
-      icon: <Check size={20} className="text-green-500" />
+      icon: <Check size={20} className="text-green-500" />,
+      onClick: () => window.location.href = "mailto:ohscentric@gmail.com"
     }
   ];
 
@@ -106,6 +127,7 @@ const Pricing = () => {
                   ))}
                 </ul>
                 <button 
+                  onClick={plan.onClick}
                   className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
                     plan.popular 
                       ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-md" 
