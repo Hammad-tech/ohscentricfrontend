@@ -1,4 +1,5 @@
 import { Mail, Shield } from "lucide-react";
+import logoWhite from "@/app/assets/images/logo-white.svg";
 
 const Footer = () => {
   return (
@@ -7,19 +8,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div>
             <div className="flex items-center mb-5">
-              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center mr-3">
-                <Shield size={20} />
-              </div>
-              <h3 className="text-2xl font-bold">Ohscentric</h3>
+              <img src={logoWhite} alt="Ohscentric" className="h-20 w-auto" />
             </div>
-            <p className="text-gray-400 mb-6 leading-relaxed">
-              Your AI-powered workplace safety assistant, providing instant answers and compliance guidance to keep your team protected.
-            </p>
-            <div className="flex space-x-4">
-              <span className="text-2xl">🇦🇺</span>
-              <span className="text-2xl">🇦🇮</span>
-              <span className="text-2xl">🏳️‍🌈</span>
-            </div>
+            {/* <h3 className="text-2xl font-bold">Ohscentric</h3> */}
           </div>
           <div>
             <h4 className="text-lg font-semibold mb-5 flex items-center">

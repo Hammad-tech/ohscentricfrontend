@@ -98,7 +98,7 @@ const LoginPage = () => {
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
               <Shield className="w-6 h-6 text-white" />
             </div>
-            <span className="ml-3 text-xl font-bold text-gray-900 dark:text-white">Ohsist</span>
+            <span className="ml-3 text-xl font-bold text-gray-900 dark:text-white">Ohscentric</span>
           </div>
         </div>
       </div>
@@ -109,7 +109,7 @@ const LoginPage = () => {
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Welcome Back to{" "}
                 <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-                  Ohsist
+                  Ohscentric
                 </span>
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl">
@@ -120,7 +120,7 @@ const LoginPage = () => {
                   <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-3">
                     <Check className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">OSHA Compliant</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">OSH/WHS Compliant</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Certified recommendations</p>
                 </div>
                 <div className="text-center">
@@ -308,7 +308,7 @@ const LoginPage = () => {
                     </div>
                     <div className="relative flex justify-center text-sm">
                       <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                        New to Ohsist?
+                        New to Ohscentric?
                       </span>
                     </div>
                   </div>

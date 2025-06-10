@@ -40,7 +40,7 @@ const PaymentCancelPage: FC = () => {
         </h1>
         
         <p className="text-gray-600 mb-6">
-          No worries! Your payment was cancelled and no charges were made. You can continue using Ohsist with your current plan or try upgrading again anytime.
+          No worries! Your payment was cancelled and no charges were made. You can continue using Ohscentric with your current plan or try upgrading again anytime.
         </p>
 
         {/* What You're Missing */}
@@ -87,7 +87,7 @@ const PaymentCancelPage: FC = () => {
         <div className="mt-6 pt-6 border-t border-gray-200">
           <p className="text-xs text-gray-500">
             Questions about pricing?{" "}
-            <a href="mailto:support@ohsist.com" className="text-blue-600 hover:underline">
+            <a href="mailto:support@ohscentric.com" className="text-blue-600 hover:underline">
               Contact our team
             </a>
           </p>

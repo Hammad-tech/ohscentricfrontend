@@ -261,7 +261,7 @@ const LinksPage = () => {
             href="#chatbot"
             className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:-translate-y-1"
           >
-            Ask Ohsist
+            Ask Ohscentric
             <ChevronRight size={20} className="ml-2" />
           </a>
         </div>

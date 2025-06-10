@@ -68,7 +68,7 @@ const ForgotPasswordPage = () => {
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
               <Shield className="w-6 h-6 text-white" />
             </div>
-            <span className="ml-3 text-xl font-bold text-gray-900 dark:text-white">Ohsist</span>
+            <span className="ml-3 text-xl font-bold text-gray-900 dark:text-white">Ohscentric</span>
           </div>
         </div>
       </div>

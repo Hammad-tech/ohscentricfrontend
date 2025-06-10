@@ -7,7 +7,7 @@ const Layout: FC = () => {
   const authRoutes = ["/login", "/signup", "/forget-password"];
   const showSidebar = !authRoutes.includes(location.pathname);
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

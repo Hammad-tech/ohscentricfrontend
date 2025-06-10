@@ -12,7 +12,7 @@ const ChatBotPage = () => {
   const [chatHistory, setChatHistory] = useState([
     { 
       sender: "bot", 
-      message: "👋 Welcome to Safety Chatbot! I'm your AI safety assistant. I can help you with safety regulations, compliance questions, risk assessments, and best practices. What would you like to know?",
+      message: "👋 Welcome to Safety Chatbot! I'm your safety assistant. I can help you with safety regulations, compliance questions, and best practices. What would you like to know?",
       timestamp: new Date()
     }
   ]);
@@ -255,7 +255,7 @@ const ChatBotPage = () => {
           </h3>
           <p className="text-gray-600">
             {isTrialExpired() 
-              ? "Your 3-day free trial has ended. Upgrade to continue using Ohsist."
+              ? "Your 3-day free trial has ended. Upgrade to continue using Ohscentric."
               : "You've used all 3 free chats for today. Upgrade for unlimited access."}
           </p>
         </div>
@@ -419,7 +419,7 @@ const ChatBotPage = () => {
             >
               <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
-            <h1 className="font-semibold text-gray-800 dark:text-white">Ohsist AI</h1>
+            <h1 className="font-semibold text-gray-800 dark:text-white">Ohscentric</h1>
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
             {getStatusMessage()}
@@ -434,17 +434,17 @@ const ChatBotPage = () => {
                     <Bot className="w-8 h-8 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-                    Welcome to Ohsist AI
+                    Welcome to Ohscentric
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400 max-w-md mb-8">
                     Your AI workplace safety assistant. Ask me about safety regulations, compliance questions, risk assessments, and best practices.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
                     <button 
-                      onClick={() => setMessage("What are the basic OSHA requirements for my workplace?")}
+                      onClick={() => setMessage("What are the basic OSH/WHS requirements for my workplace?")}
                       className="p-4 text-left bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-700 transition-colors"
                     >
-                      <div className="font-medium text-gray-800 dark:text-white">OSHA Requirements</div>
+                      <div className="font-medium text-gray-800 dark:text-white">OSH/WHS Requirements</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Learn about workplace safety standards</div>
                     </button>
                     <button 
@@ -475,7 +475,7 @@ const ChatBotPage = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2 mb-2">
                           <span className="font-medium text-gray-800 dark:text-white">
-                            {chat.sender === "user" ? "You" : "Ohsist AI"}
+                            {chat.sender === "user" ? "You" : "Ohscentric"}
                           </span>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
                             {chat.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -498,7 +498,7 @@ const ChatBotPage = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2 mb-2">
-                          <span className="font-medium text-gray-800 dark:text-white">Ohsist AI</span>
+                          <span className="font-medium text-gray-800 dark:text-white">Ohscentric</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
@@ -593,7 +593,7 @@ const ChatBotPage = () => {
                 </button>
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
-                Ohsist AI may produce inaccurate information. Always verify safety information with official sources.
+                Ohscentric may produce inaccurate information. Always verify safety information with official sources.
               </div>
             </div>
           </div>

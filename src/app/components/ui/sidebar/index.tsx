@@ -2,6 +2,7 @@ import { FC } from "react";
 import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, Notebook, AlertCircle, Radio, Video, Bot, Link, LogIn, UserPlus, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/app/context/AuthContext";
+import logo from "@/app/assets/images/logo.svg";
 
 interface SidebarLinkProps {
   icon: React.ReactNode;
@@ -99,18 +100,13 @@ const Sidebar: FC<SidebarProps> = ({
       >
         <div className="flex items-center justify-between p-4">
           {!isCollapsed && (
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                <Notebook size={18} className="text-white" />
-              </div>
-              <h1 className="text-xl font-semibold text-gray-800 dark:text-white truncate">Ohist</h1>
+            <div className="flex items-center justify-center gap-2">
+              <img src={logo} alt="Ohscentric" className="h-20 w-auto" />
             </div>
           )}
           {isCollapsed && !isMobile && (
             <div className="mx-auto">
-              <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
-                <MessageSquare size={20} className="text-white" />
-              </div>
+              <img src={logo} alt="Ohscentric" className="h-10 w-auto" />
             </div>
           )}
           <button
