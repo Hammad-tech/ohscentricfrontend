@@ -4,6 +4,7 @@ import { sendMessageToChatbot, testConnection } from "@/app/services/chatbotServ
 import { useAuth } from "@/app/context/AuthContext";
 import { useTrialData } from "@/app/hooks/useTrialData";
 import stripeService from "@/app/services/stripeService";
+import ReactMarkdown from 'react-markdown';
 
 const ChatBotPage = () => {
   const [message, setMessage] = useState("");
@@ -19,7 +20,7 @@ const ChatBotPage = () => {
   
   // Use the new trial data hook
   const { user, getAuthToken } = useAuth();
-  const { trialData, loading: trialLoading, refreshTrialData } = useTrialData();
+  const { trialData, refreshTrialData } = useTrialData();
   
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -458,32 +459,35 @@ const ChatBotPage = () => {
                 </div>
               )}
               <div className="py-8 space-y-8">
-                {chatHistory.map((chat, index) => (
-                  <div key={index} className="group">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0">
-                        {chat.sender === "user" ? (
-                          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-                            <User className="w-5 h-5 text-white" />
-                          </div>
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
-                            <Bot className="w-5 h-5 text-white" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="font-medium text-gray-800 dark:text-white">
-                            {chat.sender === "user" ? "You" : "Ohscentric"}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {chat.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
+                {chatHistory.map((chat, idx) => (
+                  <div key={idx} className={`flex ${chat.sender === "user" ? "justify-end" : "justify-start"} mb-2`}>
+                    <div className={`max-w-[80%] rounded-xl px-4 py-2 ${chat.sender === "user" ? "bg-blue-600 text-white rounded-tr-none" : "bg-white text-gray-800 rounded-tl-none shadow-sm border border-gray-100"}`}>
+                      {chat.sender === "bot" ? (
                         <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
-                          {chat.message}
+                          <ReactMarkdown
+                            components={{
+                              h1: (props) => <h1 className="text-2xl font-bold mb-4" {...props} />,
+                              h2: (props) => <h2 className="text-xl font-bold mb-3" {...props} />,
+                              h3: (props) => <h3 className="text-lg font-bold mb-2" {...props} />,
+                              p: (props) => <p className="mb-4" {...props} />,
+                              ul: (props) => <ul className="list-disc pl-6 mb-4" {...props} />,
+                              ol: (props) => <ol className="list-decimal pl-6 mb-4" {...props} />,
+                              li: (props) => <li className="mb-1" {...props} />,
+                              table: (props) => <table className="border-collapse border border-gray-300 mb-4" {...props} />,
+                              th: (props) => <th className="border border-gray-300 px-4 py-2 bg-gray-100" {...props} />,
+                              td: (props) => <td className="border border-gray-300 px-4 py-2" {...props} />,
+                              code: (props) => <code className="bg-gray-100 px-1 rounded" {...props} />,
+                              pre: (props) => <pre className="bg-gray-100 p-4 rounded mb-4 overflow-x-auto" {...props} />,
+                            }}
+                          >
+                            {chat.message}
+                          </ReactMarkdown>
                         </div>
+                      ) : (
+                        <span>{chat.message}</span>
+                      )}
+                      <div className="text-xs mt-1 opacity-70 text-right">
+                        {chat.timestamp instanceof Date ? chat.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                       </div>
                     </div>
                   </div>

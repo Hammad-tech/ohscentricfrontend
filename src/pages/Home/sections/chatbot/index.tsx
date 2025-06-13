@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Send, Paperclip, Bot, User } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 
 const ChatBot = () => {
   const [message, setMessage] = useState("");
@@ -86,7 +87,30 @@ const ChatBot = () => {
                         : "bg-white text-gray-800 rounded-tl-none shadow-sm border border-gray-100"
                     }`}
                   >
-                    <div className="text-sm">{chat.message}</div>
+                    <div className="text-sm">
+                      {chat.sender === "user" ? (
+                        chat.message
+                      ) : (
+                        <ReactMarkdown
+                          components={{
+                            h1: (props) => <h1 className="text-2xl font-bold mb-4" {...props} />,
+                            h2: (props) => <h2 className="text-xl font-bold mb-3" {...props} />,
+                            h3: (props) => <h3 className="text-lg font-bold mb-2" {...props} />,
+                            p: (props) => <p className="mb-4" {...props} />,
+                            ul: (props) => <ul className="list-disc pl-6 mb-4" {...props} />,
+                            ol: (props) => <ol className="list-decimal pl-6 mb-4" {...props} />,
+                            li: (props) => <li className="mb-1" {...props} />,
+                            table: (props) => <table className="border-collapse border border-gray-300 mb-4" {...props} />,
+                            th: (props) => <th className="border border-gray-300 px-4 py-2 bg-gray-100" {...props} />,
+                            td: (props) => <td className="border border-gray-300 px-4 py-2" {...props} />,
+                            code: (props) => <code className="bg-gray-100 px-1 rounded" {...props} />,
+                            pre: (props) => <pre className="bg-gray-100 p-4 rounded mb-4 overflow-x-auto" {...props} />,
+                          }}
+                        >
+                          {chat.message}
+                        </ReactMarkdown>
+                      )}
+                    </div>
                     <div className={`text-xs mt-1 opacity-70 ${chat.sender === "user" ? "text-blue-100" : "text-gray-500"}`}>
                       {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
