@@ -29,9 +29,9 @@ const App: FC = () => {
           <Route 
             path="links" 
             element={
-              <PrivateRoute>
+              // <PrivateRoute>
                 <LinksPage />
-              </PrivateRoute>
+              // </PrivateRoute>
             } 
           />
           <Route 

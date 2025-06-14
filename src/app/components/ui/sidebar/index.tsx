@@ -3,6 +3,7 @@ import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, 
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/app/context/AuthContext";
 import logo from "@/app/assets/images/logo.svg";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SidebarLinkProps {
   icon: React.ReactNode;
@@ -14,7 +15,7 @@ interface SidebarLinkProps {
 
 const SidebarLink: FC<SidebarLinkProps> = ({ icon, text, active, onClick, isCollapsed }) => {
   return (
-    <button
+    <motion.button
       onClick={onClick}
       className={`flex items-center gap-3 px-4 py-3 w-full rounded-lg transition-colors ${
         active
@@ -22,10 +23,27 @@ const SidebarLink: FC<SidebarLinkProps> = ({ icon, text, active, onClick, isColl
           : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
       }`}
       title={isCollapsed ? text : undefined}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
-      <span className="text-lg">{icon}</span>
-      {!isCollapsed && <span className="font-medium truncate">{text}</span>}
-    </button>
+      <motion.span 
+        className="text-lg"
+        animate={active ? { rotate: [0, 10, -10, 0] } : {}}
+        transition={{ duration: 0.6 }}
+      >
+        {icon}
+      </motion.span>
+      {!isCollapsed && (
+        <motion.span 
+          className="font-medium truncate"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {text}
+        </motion.span>
+      )}
+    </motion.button>
   );
 };
 
@@ -37,21 +55,57 @@ interface ComingSoonItemProps {
 
 const ComingSoonItem: FC<ComingSoonItemProps> = ({ title, isCollapsed, icon }) => {
   return (
-    <div className={`border border-gray-200 flex items-center ${isCollapsed ? 'justify-center' : ''} rounded-lg p-3 mb-3 hover:bg-gray-50 transition-colors group cursor-pointer`}>
-      <div className="flex items-center gap-3">
-        <div className="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 group-hover:bg-blue-200 transition-colors">
+    <motion.div 
+      className={`border border-gray-200 flex items-center ${isCollapsed ? 'justify-center' : ''} rounded-lg p-3 mb-3 hover:bg-gray-50 transition-colors group cursor-pointer relative overflow-hidden`}
+      whileHover={{ 
+        y: -2,
+        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+      }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      />
+      <div className="flex items-center gap-3 relative z-10">
+        <motion.div 
+          className="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 group-hover:bg-blue-200 transition-colors"
+          whileHover={{ rotate: 360 }}
+          transition={{ duration: 0.6 }}
+        >
           {icon}
-        </div>
+        </motion.div>
         {!isCollapsed ? (
           <div>
             <p className="text-gray-800 font-medium">{title}</p>
-            <p className="text-xs text-gray-500">Coming Soon...</p>
+            <motion.div 
+              className="flex items-center"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <p className="text-xs text-gray-500 mr-1">Coming Soon</p>
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  opacity: [0.7, 1, 0.7]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <span className="text-xs">✨</span>
+              </motion.div>
+            </motion.div>
           </div>
         ) : (
           <p className="sr-only">{title}</p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -85,39 +139,69 @@ const Sidebar: FC<SidebarProps> = ({
     }
   };
 
+  const sidebarVariants = {
+    open: { 
+      x: 0,
+      width: isCollapsed && !isMobile ? "5rem" : "16rem",
+      transition: { type: "spring", stiffness: 300, damping: 30 }
+    },
+    closed: { 
+      x: "-100%",
+      transition: { type: "spring", stiffness: 300, damping: 30 }
+    }
+  };
+
   return (
     <div>
-      {isMobile && isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-      <div
-        className={`fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ${
-          isCollapsed && !isMobile ? "w-20" : "w-64"
-        } ${isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : ""}`}
+      <AnimatePresence>
+        {isMobile && isOpen && (
+          <motion.div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+            onClick={toggleSidebar}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        className={`fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800`}
+        initial={isMobile ? "closed" : "open"}
+        animate={isMobile ? (isOpen ? "open" : "closed") : "open"}
+        variants={sidebarVariants}
       >
         <div className="flex items-center justify-between p-4">
           {!isCollapsed && (
-            <div className="flex items-center justify-center gap-2">
+            <motion.div 
+              className="flex items-center justify-center gap-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
               <img src={logo} alt="Ohscentric" className="h-20 w-auto" />
-            </div>
+            </motion.div>
           )}
           {isCollapsed && !isMobile && (
-            <div className="mx-auto">
+            <motion.div 
+              className="mx-auto"
+              whileHover={{ scale: 1.1 }}
+            >
               <img src={logo} alt="Ohscentric" className="h-10 w-auto" />
-            </div>
+            </motion.div>
           )}
-          <button
+          <motion.button
             onClick={toggleSidebar}
             className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
           >
             {isMobile ? (
               <X size={20} className="text-gray-600 dark:text-gray-400" />
             ) : (
-              <svg
+              <motion.svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
                 height="20"
@@ -128,11 +212,13 @@ const Sidebar: FC<SidebarProps> = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className="text-gray-600 dark:text-gray-400"
+                animate={{ rotate: isCollapsed ? 0 : 180 }}
+                transition={{ duration: 0.3 }}
               >
-                <polyline points={isCollapsed ? "9 18 15 12 9 6" : "15 18 9 12 15 6"} />
-              </svg>
+                <polyline points="15 18 9 12 15 6" />
+              </motion.svg>
             )}
-          </button>
+          </motion.button>
         </div>
         
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-1">
@@ -157,27 +243,46 @@ const Sidebar: FC<SidebarProps> = ({
             active={isActiveRoute('/links')} 
             isCollapsed={isCollapsed} 
           />
-          <div className="mt-10 mb-2">
+
+          <motion.div 
+            className="mt-10 mb-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             {!isCollapsed && (
-              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4 mb-3">
+              <motion.h3 
+                className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4 mb-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
                 COMING SOON
-              </h3>
+              </motion.h3>
             )}
             <div className={`${isCollapsed ? "px-1" : ""} space-y-1`}>
               <ComingSoonItem title="OhsVid" icon={<Video size={16} />} isCollapsed={isCollapsed} />
               <ComingSoonItem title="OhsAware" icon={<AlertCircle size={16} />} isCollapsed={isCollapsed} />
               <ComingSoonItem title="OhsPodcast" icon={<Radio size={16} />} isCollapsed={isCollapsed} />
             </div>
-          </div>
+          </motion.div>
         </div>
+
         <div className="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1">
-          <SidebarLink icon={<HelpCircle />} text="Help & Support" isCollapsed={isCollapsed} />
-          <SidebarLink icon={<Settings />} text="Settings" isCollapsed={isCollapsed} />
+          <SidebarLink 
+            icon={<HelpCircle />} 
+            text="Help & Support" 
+            isCollapsed={isCollapsed} 
+          />
+          <SidebarLink 
+            icon={<Settings />} 
+            text="Settings" 
+            isCollapsed={isCollapsed} 
+          />
         </div>
         
         <div className="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1">
           {user ? (
-            // Show logout when user is logged in
             <SidebarLink 
               onClick={handleLogout}
               icon={<LogOut />} 
@@ -185,7 +290,6 @@ const Sidebar: FC<SidebarProps> = ({
               isCollapsed={isCollapsed} 
             />
           ) : (
-            // Show login/signup when user is not logged in
             <>
               <SidebarLink 
                 onClick={() => navigate('/login')} 
@@ -204,7 +308,7 @@ const Sidebar: FC<SidebarProps> = ({
             </>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
