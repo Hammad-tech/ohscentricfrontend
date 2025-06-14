@@ -26,11 +26,6 @@ const Features: FC = () => {
       description: "Share safety insights across your organization and keep everyone informed about the latest compliance requirements and safety protocols."
     },
     {
-      icon: BarChart3,
-      title: "Safety Training Management",
-      description: "Streamline your safety training programs with automated tracking, certification management, and compliance reporting."
-    },
-    {
       icon: FileText,
       title: "Compliance Documentation",
       description: "Generate and manage all necessary safety documentation with templates that meet regulatory standards and requirements."
@@ -40,11 +35,6 @@ const Features: FC = () => {
       title: "Real-time Updates",
       description: "Stay current with the latest safety regulations and industry standards through our continuously updated knowledge base."
     },
-    {
-      icon: Clock,
-      title: "24/7 Availability",
-      description: "Access safety guidance whenever you need it, ensuring your team can address safety concerns at any time of day."
-    }
   ];
 
   const containerVariants = {
@@ -227,7 +217,7 @@ const Features: FC = () => {
           {features.map((feature, index) => (
             <motion.div 
               key={index}
-              className="group bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden"
+              className={`${index == 3 ? 'col-start-2': ''} group bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden`}
               variants={cardVariants}
               whileHover={{ 
                 y: -10,
