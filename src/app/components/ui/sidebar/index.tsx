@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, Notebook, AlertCircle, Radio, Video, Bot, Link, LogIn, UserPlus, LogOut } from "lucide-react";
+import { Home, MessageSquare, Layers, Settings, BookOpen, Users, HelpCircle, X, Notebook, AlertCircle, Radio, Video, Bot, Link, LogIn, UserPlus, LogOut, Paperclip, FileText, FileCheck } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/app/context/AuthContext";
 import logo from "@/app/assets/images/logo.svg";
@@ -270,14 +270,16 @@ const Sidebar: FC<SidebarProps> = ({
 
         <div className="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1">
           <SidebarLink 
-            icon={<HelpCircle />} 
-            text="Help & Support" 
+            icon={<FileText />} 
+            text="Eula" 
             isCollapsed={isCollapsed} 
+            onClick={() => navigate('/eula')}
           />
           <SidebarLink 
-            icon={<Settings />} 
-            text="Settings" 
+            icon={<FileCheck />} 
+            text="Terms Of Use" 
             isCollapsed={isCollapsed} 
+            onClick={() => navigate('/terms-of-use')} 
           />
         </div>
         
