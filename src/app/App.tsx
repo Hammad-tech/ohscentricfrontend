@@ -11,6 +11,8 @@ import PaymentSuccessPage from "@/pages/Payment/Success/Page";
 import PaymentCancelPage from "@/pages/Payment/Cancel/Page";
 import { PrivateRoute } from "@/utils/privateRoute";
 import { AuthRoute } from "@/utils/authRoute";
+import EulaPage from "@/pages/Eula/Page";
+import TermsOfUsePage from "@/pages/TermsOfUse/Page";
 
 const App: FC = () => {
   return (
@@ -29,9 +31,19 @@ const App: FC = () => {
           <Route 
             path="links" 
             element={
-              // <PrivateRoute>
                 <LinksPage />
-              // </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="eula" 
+            element={
+                <EulaPage />
+            } 
+          />
+          <Route 
+            path="terms-of-use" 
+            element={
+                <TermsOfUsePage />
             } 
           />
           <Route 
